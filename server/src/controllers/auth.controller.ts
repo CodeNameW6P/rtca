@@ -4,26 +4,25 @@ import { genSalt, hash, compare } from "bcrypt";
 import { generateJWT } from "../config/JWT";
 
 export const signUp = async (req: Request, res: Response) => {
-    const username = req.body.username.trim();
-    const email = req.body.email.trim();
-    const password = req.body.password.trim();
-
-    if (!username || typeof username !== "string" || username.length === 0) {
-        res.status(400).json({ message: "Username is required" });
-        return;
-    }
-    if (!email || typeof email !== "string" || email.length === 0) {
-        res.status(400).json({ message: "Email is required" });
-        return;
-    }
-    if (!password || typeof password !== "string" || password.length === 0) {
-        res.status(400).json({ message: "Password is required" });
-        return;
-    }
-
     try {
-        const existingUser = await User.findOne({ email: email });
+        const username = req.body.username.trim();
+        const email = req.body.email.trim();
+        const password = req.body.password.trim();
 
+        if (!username || typeof username !== "string" || username.length === 0) {
+            res.status(400).json({ message: "Username is required" });
+            return;
+        }
+        if (!email || typeof email !== "string" || email.length === 0) {
+            res.status(400).json({ message: "Email is required" });
+            return;
+        }
+        if (!password || typeof password !== "string" || password.length === 0) {
+            res.status(400).json({ message: "Password is required" });
+            return;
+        }
+
+        const existingUser = await User.findOne({ email: email });
         if (existingUser) {
             res.status(400).json({ message: "User already exists" });
             return;
@@ -52,6 +51,8 @@ export const signUp = async (req: Request, res: Response) => {
                     username: newUser.username,
                     email: newUser.email,
                     profilePicture: newUser.profilePicture,
+                    createdAt: newUser.createdAt,
+                    updatedAt: newUser.updatedAt,
                 });
         } else {
             res.status(400).json({ message: "User creation failed" });
@@ -67,29 +68,27 @@ export const signUp = async (req: Request, res: Response) => {
 };
 
 export const signIn = async (req: Request, res: Response) => {
-    const email = req.body.email.trim();
-    const password = req.body.password.trim();
-
-    if (!email || typeof email !== "string" || email.length === 0) {
-        res.status(400).json({ message: "Email is required" });
-        return;
-    }
-    if (!password || typeof password !== "string" || password.length === 0) {
-        res.status(400).json({ message: "Password is required" });
-        return;
-    }
-
     try {
-        const existingUser = await User.findOne({ email: email });
+        const email = req.body.email.trim();
+        const password = req.body.password.trim();
 
+        if (!email || typeof email !== "string" || email.length === 0) {
+            res.status(400).json({ message: "Email is required" });
+            return;
+        }
+        if (!password || typeof password !== "string" || password.length === 0) {
+            res.status(400).json({ message: "Password is required" });
+            return;
+        }
+
+        const existingUser = await User.findOne({ email: email });
         if (!existingUser) {
             res.status(400).json({ message: "Incorrect email or password" });
             return;
         }
 
-        const passwordValidity = compare(password, existingUser.password);
-
-        if (!passwordValidity) {
+        const isPasswordValid = compare(password, existingUser.password);
+        if (!isPasswordValid) {
             res.status(400).json({ message: "Incorrect email or password" });
             return;
         }
@@ -107,6 +106,8 @@ export const signIn = async (req: Request, res: Response) => {
                 username: existingUser.username,
                 email: existingUser.email,
                 profilePicture: existingUser.profilePicture,
+                createdAt: existingUser.createdAt,
+                updatedAt: existingUser.updatedAt,
             });
     } catch (error: unknown) {
         if (error instanceof Error) {
