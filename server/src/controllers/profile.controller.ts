@@ -1,5 +1,6 @@
 import { Response } from "express";
 import User from "../models/user.model";
+import cloudinary from "../config/cloudinary";
 
 export const getProfile = async (req: any, res: Response) => {
     try {
@@ -30,18 +31,23 @@ export const getProfile = async (req: any, res: Response) => {
 export const updateProfile = async (req: any, res: Response) => {
     try {
         const username = req.body.username.trim();
-        const profilePicture = req.body.profilePicture.trim();
+        const profilePicture = req.body.profilePicture;
 
         if (!username || typeof username !== "string" || username.length === 0) {
             res.status(400).json({ message: "Username is required" });
             return;
         }
+        if (!profilePicture) {
+            res.status(400).json({ message: "Profile picure is required" });
+            return;
+        }
 
+        const uploadResponse = await cloudinary.uploader.upload(profilePicture);
         const updatedUser = await User.findOneAndUpdate(
             { _id: req.userData._id },
             {
                 username: username,
-                profilePicture: profilePicture,
+                profilePicture: uploadResponse.secure_url,
             },
             {
                 new: true,
@@ -49,7 +55,7 @@ export const updateProfile = async (req: any, res: Response) => {
         );
 
         if (!updatedUser) {
-            res.status(400).json({ message: "Couldn't edit user or user doesn't exist" });
+            res.status(400).json({ message: "Couldn't update user or user doesn't exist" });
             return;
         }
 

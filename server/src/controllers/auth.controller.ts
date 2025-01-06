@@ -43,7 +43,7 @@ export const signUp = async (req: Request, res: Response) => {
                 maxAge: 3 * 60 * 1000,
                 httpOnly: true,
                 sameSite: "strict",
-                // secure: true,
+                secure: process.env.SERVER_STATE === "PRODUCTION" ? true : false,
             })
                 .status(201)
                 .json({
@@ -98,7 +98,7 @@ export const signIn = async (req: Request, res: Response) => {
             maxAge: 3 * 60 * 1000,
             httpOnly: true,
             sameSite: "strict",
-            // secure: true,
+            secure: process.env.SERVER_STATE === "PRODUCTION" ? true : false,
         })
             .status(200)
             .json({

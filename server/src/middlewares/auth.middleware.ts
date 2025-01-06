@@ -17,7 +17,7 @@ export const authMiddleware = async (req: any, res: Response, next: NextFunction
             return;
         }
 
-        const existingUser = await User.findOne({ _id: verifiedToken._id });
+        const existingUser = await User.findOne({ _id: verifiedToken._id }).select("-password");
         if (!existingUser) {
             res.status(404).json({ message: "Couldn't find user" });
             return;
