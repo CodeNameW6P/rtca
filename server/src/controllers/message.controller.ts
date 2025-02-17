@@ -1,19 +1,11 @@
 import { Response } from "express";
 import Message from "../models/message.model";
 import cloudinary from "../config/cloudinary";
+import Chat from "../models/chat.model";
 
 export const getMessages = async (req: any, res: Response) => {
     try {
-        const senderID = req.user.id;
-        const receiverID = req.params.id;
-
-        const messages = await Message.find({
-            $or: [
-                { sender: senderID, receiver: receiverID },
-                { sender: receiverID, receiver: senderID },
-            ],
-        });
-
+        const messages = await Message.find({ chat: req.params._id }).sort({ createdAt: 1 });
         res.status(200).json(messages);
     } catch (error: unknown) {
         if (error instanceof Error) {
@@ -30,8 +22,8 @@ export const sendMessage = async (req: any, res: Response) => {
         const text = req.body.text.trim();
         const file = req.body.file;
 
-        const senderID = req.user.id;
-        const receiverID = req.params.id;
+        const senderID = req.userData._id;
+        const chatID = req.params._id;
 
         let fileURL;
         if (file) {
@@ -41,10 +33,22 @@ export const sendMessage = async (req: any, res: Response) => {
 
         const newMessage = await Message.create({
             sender: senderID,
-            receiver: receiverID,
+            chat: chatID,
             text: text,
             file: fileURL,
         });
+
+        if (!newMessage) {
+            res.status(400).json("Couldn't create a message");
+            return;
+        }
+
+        const updatedChat = await Chat.findOneAndUpdate({ _id: chatID }, { lastMessage: newMessage._id });
+
+        if (!updatedChat) {
+            res.status(400).json("Couldn't update last message");
+            return;
+        }
 
         res.status(200).json(newMessage);
     } catch (error: unknown) {

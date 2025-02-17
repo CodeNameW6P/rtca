@@ -2,7 +2,7 @@ import { connect } from "mongoose";
 
 const connectDB = async () => {
     const connectionString = process.env.DB_CONNECTION_STRING;
-    
+
     try {
         const connection = await connect(connectionString as string);
         console.log(`Database connection established: ${connection.connection.host}`);

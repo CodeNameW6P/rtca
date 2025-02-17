@@ -7,9 +7,9 @@ const messageSchema = new mongoose.Schema(
             ref: "User",
             required: true,
         },
-        receiver: {
+        chat: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
+            ref: "Chat",
             required: true,
         },
         text: {

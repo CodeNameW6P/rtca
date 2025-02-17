@@ -1,11 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
-import counterReducer from "./slices/counterSlice";
-import authReducer from "./slices/authSlice";
+import userReducer from "./slices/userSlice";
+import chatReducer from "./slices/chatSlice";
+import searchReducer from "./slices/searchSlice";
 
 export const store = configureStore({
     reducer: {
-        counter: counterReducer,
-        auth: authReducer,
+        user: userReducer,
+        chat: chatReducer,
+        search: searchReducer,
     },
 });
 

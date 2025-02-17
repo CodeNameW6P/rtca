@@ -2,25 +2,28 @@ import { Request, Response } from "express";
 import User from "../models/user.model";
 import { genSalt, hash, compare } from "bcrypt";
 import { generateJWT } from "../config/JWT";
+import { z } from "zod";
+
+const signUpSchema = z.object({
+    username: z.string().trim().nonempty("Name can't be empty").min(2, "Name must contain at least 2 characters"),
+    email: z.string().trim().nonempty("Email can't be empty").email("Please enter a valid email"),
+    password: z
+        .string()
+        .trim()
+        .nonempty("Password can't be empty")
+        .min(3, "Password must contain at least 3 characters"),
+});
 
 export const signUp = async (req: Request, res: Response) => {
     try {
-        const username = req.body.username.trim();
-        const email = req.body.email.trim();
-        const password = req.body.password.trim();
+        const validationResult = signUpSchema.safeParse(req.body);
 
-        if (!username || typeof username !== "string" || username.length === 0) {
-            res.status(400).json({ message: "Username is required" });
+        if (!validationResult.success) {
+            res.status(400).json({ message: validationResult.error.format() });
             return;
         }
-        if (!email || typeof email !== "string" || email.length === 0) {
-            res.status(400).json({ message: "Email is required" });
-            return;
-        }
-        if (!password || typeof password !== "string" || password.length === 0) {
-            res.status(400).json({ message: "Password is required" });
-            return;
-        }
+
+        const { username, email, password } = validationResult.data;
 
         const existingUser = await User.findOne({ email: email });
         if (existingUser) {
@@ -28,7 +31,7 @@ export const signUp = async (req: Request, res: Response) => {
             return;
         }
 
-        const salt = await genSalt(10);
+        const salt = await genSalt(8);
         const hashedPassword = await hash(password, salt);
 
         const newUser = await User.create({
@@ -67,19 +70,25 @@ export const signUp = async (req: Request, res: Response) => {
     }
 };
 
+const signInSchema = z.object({
+    email: z.string().trim().nonempty("Email can't be empty").email("Please enter a valid email"),
+    password: z
+        .string()
+        .trim()
+        .nonempty("Password can't be empty")
+        .min(3, "Password must contain at least 3 characters"),
+});
+
 export const signIn = async (req: Request, res: Response) => {
     try {
-        const email = req.body.email.trim();
-        const password = req.body.password.trim();
+        const validationResult = signInSchema.safeParse(req.body);
 
-        if (!email || typeof email !== "string" || email.length === 0) {
-            res.status(400).json({ message: "Email is required" });
+        if (!validationResult.success) {
+            res.status(400).json({ message: validationResult.error.format() });
             return;
         }
-        if (!password || typeof password !== "string" || password.length === 0) {
-            res.status(400).json({ message: "Password is required" });
-            return;
-        }
+
+        const { email, password } = validationResult.data;
 
         const existingUser = await User.findOne({ email: email });
         if (!existingUser) {
@@ -87,7 +96,7 @@ export const signIn = async (req: Request, res: Response) => {
             return;
         }
 
-        const isPasswordValid = compare(password, existingUser.password);
+        const isPasswordValid = await compare(password, existingUser.password);
         if (!isPasswordValid) {
             res.status(400).json({ message: "Incorrect email or password" });
             return;

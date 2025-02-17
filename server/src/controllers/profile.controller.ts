@@ -4,20 +4,13 @@ import cloudinary from "../config/cloudinary";
 
 export const getProfile = async (req: any, res: Response) => {
     try {
-        const existingUser = await User.findOne({ _id: req.userData._id });
+        const existingUser = await User.findOne({ _id: req.userData._id }).select("-password");
         if (!existingUser) {
             res.status(404).json({ message: "Couldn't find user" });
             return;
         }
 
-        res.status(200).json({
-            _id: existingUser._id,
-            username: existingUser.username,
-            email: existingUser.email,
-            profilePicture: existingUser.profilePicture,
-            createdAt: existingUser.createdAt,
-            updatedAt: existingUser.updatedAt,
-        });
+        res.status(200).json(existingUser);
     } catch (error: unknown) {
         if (error instanceof Error) {
             console.error(error.message);
@@ -65,6 +58,28 @@ export const updateProfile = async (req: any, res: Response) => {
             profilePicture: updatedUser.profilePicture,
             updatedAt: updatedUser.updatedAt,
         });
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            console.error(error.message);
+        } else {
+            console.error(error);
+        }
+        res.status(500).json({ message: "Internal error occured" });
+    }
+};
+
+export const findUsers = async (req: any, res: Response) => {
+    try {
+        const query = req.query.query;
+
+        const existingUsers = await User.find({
+            $or: [{ username: { $regex: query, $options: "i" } }, { email: { $regex: query, $options: "i" } }],
+        });
+        if (!existingUsers) {
+            res.status(400).json({ message: "You did something wrong" });
+            return;
+        }
+        res.status(200).json(existingUsers);
     } catch (error: unknown) {
         if (error instanceof Error) {
             console.error(error.message);
