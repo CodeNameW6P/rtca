@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { api, extractError } from "../config/axiosConfig";
 import { useAppDispatch } from "../config/redux/hooks";
 import { signIn } from "../config/redux/slices/userSlice";
+import { io } from "socket.io-client";
 
 const signUpFormSchema = z
     .object({
@@ -41,6 +42,13 @@ const SignUp: React.FC = () => {
     const handleFormSubmit: SubmitHandler<SignUpFormType> = async (data: SignUpFormType) => {
         try {
             const res = await api.post("/auth/signup", data);
+            const socket = io("http://localhost:8080", {
+                query: {
+                    _id: res.data._id,
+                },
+            });
+            socket.connect();
+
             dispatch(
                 signIn({
                     _id: res.data._id,
@@ -48,6 +56,7 @@ const SignUp: React.FC = () => {
                     email: res.data.email,
                     profilePicture: res.data.profilePicture,
                     createdAt: res.data.createdAt,
+                    socket: socket,
                 })
             );
         } catch (error) {

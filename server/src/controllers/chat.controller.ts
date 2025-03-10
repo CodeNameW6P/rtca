@@ -52,7 +52,8 @@ export const getChats = async (req: any, res: Response) => {
         const chats = await Chat.find({ users: { $in: [req.params._id] } })
             .populate("users", "-password")
             .populate("groupAdmin", "-password")
-            .populate("lastMessage");
+            .populate("lastMessage")
+            .sort({ updatedAt: -1 });
 
         res.status(200).json(chats);
     } catch (error: unknown) {

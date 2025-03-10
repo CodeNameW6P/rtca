@@ -8,6 +8,7 @@ export type UserStateType = {
     email: string | null;
     profilePicture: string | null;
     createdAt: string | null;
+    socket: any;
 };
 
 const initialState: UserStateType = {
@@ -17,28 +18,21 @@ const initialState: UserStateType = {
     email: null,
     profilePicture: null,
     createdAt: null,
+    socket: null,
 };
 
 const userSlice = createSlice({
     name: "user",
     initialState,
     reducers: {
-        signIn: (
-            state,
-            action: PayloadAction<{
-                _id: string;
-                username: string;
-                email: string;
-                profilePicture: string;
-                createdAt: string;
-            }>
-        ) => {
+        signIn: (state, action: PayloadAction<any>) => {
             state.isAuthenticated = true;
             state._id = action.payload._id;
             state.username = action.payload.username;
             state.email = action.payload.email;
             state.profilePicture = action.payload.profilePicture;
             state.createdAt = action.payload.createdAt;
+            state.socket = action.payload.socket;
         },
         signOut: (state) => {
             state.isAuthenticated = false;
@@ -47,6 +41,7 @@ const userSlice = createSlice({
             state.email = null;
             state.profilePicture = null;
             state.createdAt = null;
+            state.socket = null;
         },
     },
 });

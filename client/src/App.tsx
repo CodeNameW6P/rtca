@@ -10,7 +10,6 @@ import { api, extractError } from "./config/axiosConfig";
 import { signIn } from "./config/redux/slices/userSlice";
 import SignUp from "./pages/SignUp";
 import SignIn from "./pages/SignIn";
-import { AxiosResponse } from "axios";
 
 function App() {
     const isAuthenticated = useAppSelector((state: RootState) => state.user.isAuthenticated);
@@ -22,13 +21,7 @@ function App() {
         const getProfile = async () => {
             setIsLoading((prev) => (prev = true));
             try {
-                const res = (await api.get("/profile")) as AxiosResponse<{
-                    _id: string;
-                    username: string;
-                    email: string;
-                    profilePicture: string;
-                    createdAt: string;
-                }>;
+                const res = await api.get("/profile");
                 dispatch(signIn(res.data));
             } catch (error) {
                 console.error(extractError(error));

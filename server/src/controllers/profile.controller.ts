@@ -73,6 +73,7 @@ export const findUsers = async (req: any, res: Response) => {
         const query = req.query.query;
 
         const existingUsers = await User.find({
+            _id: { $ne: req.userData._id },
             $or: [{ username: { $regex: query, $options: "i" } }, { email: { $regex: query, $options: "i" } }],
         });
         if (!existingUsers) {

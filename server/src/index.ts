@@ -8,8 +8,8 @@ import profileRouter from "./routes/profile.route";
 import messageRouter from "./routes/message.route";
 import chatRouter from "./routes/chat.route";
 import connectDB from "./config/connectDB";
+import { app, server } from "./config/socket.io";
 
-const app = express();
 const PORT = process.env.PORT || 8080;
 
 const corsOptions: CorsOptions = {
@@ -31,7 +31,7 @@ app.get("/", (req: Request, res: Response) => {
     res.send("hello");
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server initiated on PORT: ${PORT}`);
     connectDB();
 });

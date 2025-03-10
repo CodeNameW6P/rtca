@@ -3,7 +3,7 @@ import { sign, verify } from "jsonwebtoken";
 
 export const generateJWT = (_id: ObjectId) => {
     const token = sign({ _id: _id }, process.env.JWT_KEY as string, {
-        expiresIn: "3m",
+        expiresIn: "30m",
     });
     return token;
 };

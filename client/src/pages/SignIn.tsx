@@ -6,6 +6,7 @@ import { z } from "zod";
 import { api, extractError } from "../config/axiosConfig";
 import { signIn } from "../config/redux/slices/userSlice";
 import { useAppDispatch } from "../config/redux/hooks";
+import { io } from "socket.io-client";
 
 const signInFormSchema = z.object({
     email: z.string().nonempty("Email can't be empty").email("Please enter a valid email"),
@@ -26,6 +27,14 @@ const SignIn: React.FC = () => {
     const handleFormSubmit: SubmitHandler<SignInFormType> = async (data: SignInFormType) => {
         try {
             const res = await api.post("/auth/signin", data);
+
+            const socket = io("http://localhost:8080", {
+                query: {
+                    _id: res.data._id,
+                },
+            });
+            socket.connect();
+
             dispatch(
                 signIn({
                     _id: res.data._id,
@@ -33,6 +42,7 @@ const SignIn: React.FC = () => {
                     email: res.data.email,
                     profilePicture: res.data.profilePicture,
                     createdAt: res.data.createdAt,
+                    socket: socket,
                 })
             );
         } catch (error) {

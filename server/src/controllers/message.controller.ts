@@ -2,10 +2,13 @@ import { Response } from "express";
 import Message from "../models/message.model";
 import cloudinary from "../config/cloudinary";
 import Chat from "../models/chat.model";
+import { io } from "../config/socket.io";
 
 export const getMessages = async (req: any, res: Response) => {
     try {
-        const messages = await Message.find({ chat: req.params._id }).sort({ createdAt: 1 });
+        const messages = await Message.find({ chat: req.params._id })
+            .populate("sender", "-password")
+            .sort({ createdAt: 1 });
         res.status(200).json(messages);
     } catch (error: unknown) {
         if (error instanceof Error) {
@@ -50,7 +53,11 @@ export const sendMessage = async (req: any, res: Response) => {
             return;
         }
 
-        res.status(200).json(newMessage);
+        const newPopulatedMessage = await Message.findOne({ _id: newMessage._id }).populate("sender", "-password");
+
+        io.emit("newMessage", newPopulatedMessage);
+
+        res.status(200).json(newPopulatedMessage);
     } catch (error: unknown) {
         if (error instanceof Error) {
             console.error(error.message);

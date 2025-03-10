@@ -3,7 +3,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 
 export type ChatStateType = {
     chats: any[];
-    currentChat: string | null;
+    currentChat: any;
     messages: any[];
 };
 
@@ -20,7 +20,7 @@ const chatSlice = createSlice({
         setChats: (state, action: PayloadAction<[]>) => {
             state.chats = action.payload;
         },
-        setCurrentChat: (state, action: PayloadAction<string>) => {
+        setCurrentChat: (state, action: PayloadAction<any>) => {
             state.currentChat = action.payload;
         },
         setMessages: (state, action: PayloadAction<any[]>) => {
