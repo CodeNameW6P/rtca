@@ -157,10 +157,26 @@ const Homepage: React.FC = () => {
 
     const handleCreateDM = async () => {
         try {
-            if (selectedUsers.length > 1) {
-                const res = await api.post(`/chat`, { name: "", isGroupChat: false });
+            let chatName = "";
+            let chatIsGroupChat = false;
+
+            if (selectedUsers && selectedUsers.length > 1) {
+                chatName = "group chat";
+                chatIsGroupChat = true;
             }
-        } catch (error) {}
+
+            const res = await api.post(`/chat`, {
+                name: chatName,
+                isGroupChat: chatIsGroupChat,
+                users: [...selectedUsers, _id],
+                groupAdmin: _id,
+            });
+            if (res) {
+                dispatch(setCurrentChat(res.data));
+            }
+        } catch (error) {
+            console.error(extractError(error));
+        }
     };
 
     const handleSignOut = async () => {

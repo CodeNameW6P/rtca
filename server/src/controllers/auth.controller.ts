@@ -43,7 +43,7 @@ export const signUp = async (req: Request, res: Response) => {
         if (newUser) {
             const token = generateJWT(newUser._id);
             res.cookie("jwt", token, {
-                maxAge: 3 * 60 * 1000,
+                maxAge: 30 * 60 * 1000,
                 httpOnly: true,
                 sameSite: "strict",
                 secure: process.env.SERVER_STATE === "PRODUCTION" ? true : false,

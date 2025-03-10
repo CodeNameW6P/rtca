@@ -42,7 +42,7 @@ const SignIn: React.FC = () => {
                     email: res.data.email,
                     profilePicture: res.data.profilePicture,
                     createdAt: res.data.createdAt,
-                    socket: socket,
+                    // socket: socket,
                 })
             );
         } catch (error) {
